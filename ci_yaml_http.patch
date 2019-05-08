@@ -1,17 +1,13 @@
-diff --git a/app/models/ci/pipeline.rb b/app/models/ci/pipeline.rb
-index a2126cf..fd1d5b2 100644
---- a/app/models/ci/pipeline.rb
-+++ b/app/models/ci/pipeline.rb
-@@ -351,7 +351,11 @@ module Ci
+--- pipeline.rb 2017-12-07 23:05:59.000000000 +0000
++++ pipeline_new.rb     2019-05-08 20:35:04.864638554 +0000
+@@ -371,7 +371,9 @@
        return @ci_yaml_file if defined?(@ci_yaml_file)
  
-       @ci_yaml_file = begin
--        project.repository.gitlab_ci_yml_for(sha, ci_yaml_file_path)
+       @ci_yaml_file =
+-        if auto_devops_source?
 +        if ci_yaml_file_path =~ URI::regexp # if this is a URL
 +          open(ci_yaml_file_path).read() # open and read the contents
-+        else # otherwise treat it as relative path within repo (at this commit)
-+          project.repository.gitlab_ci_yml_for(sha, ci_yaml_file_path)
-+        end
-       rescue Rugged::ReferenceError, GRPC::NotFound, GRPC::Internal
-         self.yaml_errors =
-           "Failed to load CI/CD config file at #{ci_yaml_file_path}"
++        elsif auto_devops_source?
+           implied_ci_yaml_file
+         else
+           ci_yaml_from_repo
